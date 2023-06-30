@@ -1,0 +1,54 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package tankvstank;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+
+/**
+ *
+ * @author user
+ */
+public class Vita {
+    private Rectangle2D.Double vita[];
+    private int punti=20;
+    private int x,y;
+    private int d=20;
+    private Color colore;
+    Vita(int x,int y,Color colore){
+        this.x=x;
+        this.y=y;
+        this.colore=colore;
+        vita=new Rectangle2D.Double[punti];
+        Caricamento();
+    }
+    public int getPunti(){
+        return punti;
+    }
+    public void diminuisci(){
+        punti--;
+    }
+    public void caricaVettore(){
+        vita=new Rectangle2D.Double[punti];
+    }
+    public void Caricamento(){
+        int x=this.x;
+        int y=this.y;
+        for(int i=0;i<punti;i++){
+            vita[i]=new Rectangle2D.Double(x,y,d,d);
+            x+=d;
+        }
+    }
+    public void paint(Graphics g){
+        Graphics2D g2=(Graphics2D)g;
+        g2.setColor(colore);
+        for(int i=0;i<punti;i++){
+            g2.fill(vita[i]);
+        }
+    }
+}

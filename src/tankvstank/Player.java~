@@ -1,0 +1,174 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package tankvstank;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JPanel;
+
+/**
+ *
+ * @author studente
+ */
+public class Player implements Runnable,KeyListener{
+    private volatile boolean up,sx,dx,down,shoot;
+    private ArrayList <Sparo>pr=new ArrayList<Sparo>();
+    private int x,y,dir=0,d=70,index=0;
+    private int keys[]=new int [5];
+    private Rectangle2D.Double rect;
+    private Color colore;
+    private int delay=3;
+    private int tempo=1;
+    private boolean partita=true;
+    private Timer timer;
+    Player(JPanel panel,int keys[],Color colore,int x,int y){
+        this.keys=keys;
+        this.colore=colore;
+        this.x=x;
+        this.y=y;
+	timer=new Timer(3);
+        panel.setFocusable(true);
+        panel.requestFocusInWindow();
+        panel.addKeyListener(this);
+    }
+    public ArrayList<Sparo> getArrayList(){
+        return pr;
+    }
+    public void removeBullet(int i){
+        pr.remove(i);
+        index-=1;
+    }
+    public Rectangle2D.Double getPlayer(){
+        return rect;
+    }
+    public void setDelay(int millisec){
+        delay=millisec;
+    }
+    public void RimuoviP(int i){
+        pr.remove(i);
+        index--;
+    }
+    public void paint(Graphics g){
+        Graphics2D g2=(Graphics2D)g;
+        g2.setColor(colore);
+        rect=new Rectangle2D.Double(x, y, d, d);
+        g2.fill(rect);
+        int count=index-1;
+        if(pr.size()!=0){
+            do{
+                if(count>=0){
+                    pr.get(count).paint(g);
+                    count--;
+                }
+            }while(count>=0);
+        }
+    }
+    public void Up(){
+	synchronized(this){
+	    dir=1;
+	    y-=2;
+	}
+    }
+    public void Sx(){
+        dir=4;
+        x-=2;
+        aspetta(tempo);
+    }
+    public void Dx(){
+        dir=2;
+        x+=2;
+        aspetta(tempo);
+    }
+    public void Down(){
+        dir=3;
+        y+=2;
+        aspetta(tempo);
+    }
+    public void Shoot(){
+        if(dir!=0){
+            Sparo p=new Sparo(x+d/2,y+d/2,dir);
+            pr.add(p);
+            p.setP();
+            index += 1;
+        }
+    }
+    public void aspetta(int millisec){
+        try {
+            Thread.sleep(millisec);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void setPartita(boolean partita){
+        this.partita=partita;
+    }
+    @Override
+    public void run() {
+        while(partita){
+            if(up)
+                Up();
+            else if(sx)
+                Sx();
+            else if(dx)
+                Dx();
+            else if(down)
+                Down();
+            aspetta(delay);
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        if(partita){
+            int key=ke.getKeyCode();
+            if(key==keys[0])
+                up=true;
+            else if(key==keys[1])
+                sx=true;
+            else if(key==keys[2])
+                dx=true;
+            else if(key==keys[3])
+                down=true;
+            if(key==keys[4]){
+                //if(!shoot){
+                    //shoot=true;
+		if(!timer.getPermesso()){
+		    timer.setPermesso(true);
+		    Shoot();
+		}
+                //}
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+        if(partita){
+            int key=ke.getKeyCode();
+            if(key==keys[0])
+                up=false;
+            else if(key==keys[1])
+                sx=false;
+            else if(key==keys[2])
+                dx=false;
+            else if(key==keys[3])
+                down=false;
+            /*if(key==keys[4])
+                shoot=false;*/
+        }
+    }
+}
